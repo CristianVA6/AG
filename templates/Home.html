@@ -1,0 +1,115 @@
+{% extends 'C:/Users/Chimp/Desktop/ProyectoDoris/PGeneticos/templates/Base.html' %}
+
+
+{% block Contenido %}
+<script language="javascript" type="text/javascript"
+src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
+<script>
+
+    var rx = [0, 0, 0, 1310, 10, 110, 110, 210, 210, 450, 450, 550, 550, 750, 627, 750];
+    var ry = [0, 10, 710, 10, 600, 160, 150, 260, 250, 260, 360, 160, 260, 120, 0, 120];
+    var rw = [1320, 10, 1320, 10, 100, 10, 450, 10, 250, 10, 300, 10, 75, 10, 10, 600];
+    var rh = [10, 700, 10, 700, 10, 450, 10, 450, 10, 100, 10, 100, 10, 250, 270, 10];
+
+    function setup() {
+      var canvas = createCanvas(910, 720);
+      canvas.parent('C');
+      target = createVector(900, 60);
+
+    }
+
+    function draw() {
+      background(0);
+      stroke(226, 204, 0);
+      // Renders barrier for rockets
+      fill(255);
+      for (var c = 0; c < rx.length; c++) {
+        rect(rx[c], ry[c], rw[c], rh[c]);
+      }
+      // Renders target
+      ellipse(target.x, target.y, 60, 60);
+    }
+</script>
+<div class="row g-1">
+    <!–– Titulo ––>
+    <header class="titulo">
+        <h1>MAZE</h1>
+    </header>
+    <!–– Columna 1 ––>
+    <div class="col-12 col-md-3 col-auto">
+        <!–– Contenedor de inputs ––>
+        
+        <div class="Opciones p-3">
+            <div class="mb-4">
+                <span >Ingrece los valores.</span>
+            </div>
+            <form action="{% url 'AG:AGResultado' %}" method="GET">
+                <!–– input 1 ––>
+                <div class="input-group mb-4">
+                    <span class="input-group-text DF" id="Genes">Poblacion</span>
+                    <input type="text" class="form-control" aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-default" placeholder="Numero de poblacion" id="Genes" name="Genes">
+                </div>
+                <!–– input 2 ––>
+                <div class="input-group mb-4">
+                    <span class="input-group-text DF" id="Velocidad">Velocidad</span>
+                    <input type="text" class="form-control" aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-default" placeholder="De preferencia usar 0.5" id="Velocidad" name="Velocidad">
+                </div>
+                <!–– input 3 ––>
+                <div class="input-group mb-4">
+                    <span class="input-group-text DF" id="Mutacion">Mutacion</span>
+                    <input type="text" class="form-control" aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-default" placeholder="De preferencia usar 0.01" id="Mutacion" name="Mutacion"> 
+                </div>
+                <!–– Button ––>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-grad" type="submit">Mostrar</button>
+                </div>
+            </form>
+            
+        </div>
+
+        <!–– Contenedor de labels ––>
+        <div class="Resultados p-3">
+            <div class="mb-4">
+                <span >contenedor de labels</span>
+            </div>
+            <!–– Label 1 ––>
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <label for="colFormLabel" class="form-label">Date1</label>
+                    <input type="text" class="form-control" aria-label="Disabled input example" disabled readonly>
+                </div>
+            </div>
+            <!–– Label 2 ––>
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <label for="colFormLabel" class="form-label">Date2</label>
+                    <input type="text" class="form-control" aria-label="Disabled input example" disabled readonly>
+                    
+                </div>
+            </div>
+            <!–– Label 3 ––>
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <label for="colFormLabel" class="form-label">Date3</label>
+                    <input type="text" class="form-control" aria-label="Disabled input example" disabled readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!–– Columna 2 ––>
+    <div class="col-12 col-md-9">
+        <div class="Programa p-3" id="C"></div>
+    </div>
+</div>
+<footer class="pie">
+    <div class="text-center p-2" id="UAEM">
+        UAEM | UNIVERSIDAD AUTONOMA DEL ESTADO DE MEXICO
+        <a class="text-reset fw-bold"></a>
+    </div>
+</footer>
+</div>
+{% endblock Contenido %}
+    

@@ -1,0 +1,234 @@
+<html>
+
+<head>
+  <title>La wea esta</title>
+  <script language="javascript" type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
+  <!-- uncomment lines below to include extra p5 libraries -->
+
+  <!--<script language="javascript" src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/addons/p5.sound.min.js"></script>-->
+  {% load static %}
+  <!--DNA-->
+  <script language="javascript" type="text/javascript">
+    function DNA(genes) {
+      // Recieves genes and create a dna object
+      if (genes) {
+        this.genes = genes;
+      }
+      // If no genes just create random dna
+      else {
+        this.genes = [];
+        for (var i = 0; i < lifespan; i++) {
+          // Gives random vectors
+          this.genes[i] = p5.Vector.random2D();
+          // Sets maximum force of vector to be applied to a rocket
+          this.genes[i].setMag(maxforce);
+        }
+      }
+      // Performs a crossover with another member of the species
+      this.crossover = function (partner) {
+        var newgenes = [];
+        // Picks random midpoint
+        var mid = floor(random(this.genes.length));
+        for (var i = 0; i < this.genes.length; i++) {
+          // If i is greater than mid the new gene should come from this partner
+          if (i > mid) {
+            newgenes[i] = this.genes[i];
+          }
+          // If i < mid new gene should come from other partners gene's
+          else {
+            newgenes[i] = partner.genes[i];
+          }
+        }
+        // Gives DNA object an array
+        return new DNA(newgenes);
+      };
+
+      // Adds random mutation to the genes to add variance.
+      this.mutation = function () {
+        for (var i = 0; i < this.genes.length; i++) {
+          // if random number less than 0.01, new gene is then random vector
+          if (random(1) < parseFloat('{{M|safe}}')) {
+            this.genes[i] = p5.Vector.random2D();
+            this.genes[i].setMag(maxforce);
+          }
+        }
+      };
+    }
+  </script>
+  <!--Poblacion-->
+  <script language="javascript" type="text/javascript">
+    function Population() {
+      let a = "{{G|safe}}";
+      // Array of rockets
+      this.rockets = [];
+      // Amount of rockets
+      this.popsize = a;
+      // Amount parent rocket partners
+      this.matingpool = [];
+
+      // Associates a rocket to an array index
+      for (var i = 0; i < this.popsize; i++) {
+        this.rockets[i] = new Rocket();
+      }
+
+      this.evaluate = function () {
+        var maxfit = 0;
+        // Iterate through all rockets and calcultes their fitness
+        for (var i = 0; i < this.popsize; i++) {
+          // Calculates fitness
+          this.rockets[i].calcFitness();
+          // If current fitness is greater than max, then make max equal to current
+          if (this.rockets[i].fitness > maxfit) {
+            maxfit = this.rockets[i].fitness;
+          }
+        }
+        // Normalises fitnesses
+        for (var i = 0; i < this.popsize; i++) {
+          this.rockets[i].fitness /= maxfit;
+        }
+
+        this.matingpool = [];
+        // Take rockets fitness make in to scale of 1 to 100
+        // A rocket with high fitness will highly likely will be in the mating pool
+        for (var i = 0; i < this.popsize; i++) {
+          var n = this.rockets[i].fitness * 100;
+          for (var j = 0; j < n; j++) {
+            this.matingpool.push(this.rockets[i]);
+          }
+        }
+      };
+
+      this.f = function () {
+        for (var i = 0; i < this.popsize; i++) {
+          this.rockets[i].crashedCount();
+        }
+      };
+      // Selects appropriate genes for child
+      this.selection = function () {
+        var newRockets = [];
+        for (var i = 0; i < this.rockets.length; i++) {
+          // Picks random dna
+          var parentA = random(this.matingpool).dna;
+          var parentB = random(this.matingpool).dna;
+          // Creates child by using crossover function
+          var child = parentA.crossover(parentB);
+          child.mutation();
+          // Creates new rocket with child dna
+          newRockets[i] = new Rocket(child);
+        }
+        // This instance of rockets are the new rockets
+        this.rockets = newRockets;
+      };
+
+      // Calls for update and show functions
+      this.run = function () {
+        for (var i = 0; i < this.popsize; i++) {
+          this.rockets[i].update();
+          // Displays rockets to screen
+          this.rockets[i].show();
+
+        }
+
+      };
+    }
+
+  </script>
+  <script language="javascript" type="text/javascript" src="{% static 'js/rocket.js' %}"></script>
+  <!--sketch-->
+  <script language="javascript" type="text/javascript">
+    let a = "{{V|safe}}";
+    var population;
+    // Each rocket is alive till 400 frames
+    var lifespan = 2000;
+    // Made to display count on screen
+    var lifeP;
+    // Keeps track of frames
+    var count = 0;
+    // Where rockets are trying to go
+    var target;
+    // Max force applied to rocket
+    var maxforce = parseFloat(a);
+
+    var s = 0;
+    var epocas = 0;
+
+
+
+    // Dimensions of barrier
+    var rx = [0, 0, 0, 1310, 10, 110, 110, 210, 210, 450, 450, 550, 550, 750, 627, 750];
+    var ry = [0, 10, 710, 10, 600, 160, 150, 260, 250, 260, 360, 160, 260, 120, 0, 120];
+    var rw = [1320, 10, 1320, 10, 100, 10, 450, 10, 250, 10, 300, 10, 75, 10, 10, 600];
+    var rh = [10, 700, 10, 700, 10, 450, 10, 450, 10, 100, 10, 100, 10, 250, 270, 10];
+
+
+
+
+    function setup() {
+      var canvas = createCanvas(1320, 720);
+      canvas.parent('container');
+      population = new Population();
+      target = createVector(1250, 60);
+
+    }
+
+    function draw() {
+      background(0);
+      population.run();
+      // Displays count to window
+      population.f();
+      document.getElementById('Choques').innerHTML = s;
+      count++;
+
+      if (s >= this.population.popsize / 1.3) {
+        epocas ++;
+        document.getElementById('Salida').innerHTML = epocas;
+
+        population.evaluate();
+        population.selection();
+        // Population = new Population();
+        count = 0;
+        s = 0;
+      } else {
+        s = 0;
+      }
+      // Renders barrier for rockets
+      fill(255);
+      for (var c = 0; c < rx.length; c++) {
+        rect(rx[c], ry[c], rw[c], rh[c]);
+      }
+      // Renders target
+      ellipse(target.x, target.y, 60, 60);
+    }
+
+  </script>
+
+
+</head>
+
+<body>
+  <header style="text-align: center;">
+    <h1>Camino VS Algoritmo Genetico</h1>
+  </header>
+  <form action="{% url 'AG:AGResultado' %}" method="GET" style="text-align: center;">
+    <h1>
+      <label for="Genes">Ingrece la poblacion deceada</label>
+      <input type="text" id="Genes" name="Genes" value={{G}}>
+
+      <label for="Velocidad">Velocidad de salida</label>
+      <input type="text" id="Velocidad" name="Velocidad" value={{V}}>
+
+      <label for="Mutacion">Porcentaje de Mutacion</label>
+      <input type="text" id="Mutacion" name="Mutacion"  value={{M}}>
+
+      <br>
+      <div id="container" style="text-align: center;"></div>
+      <button type="submit">Reiniciar</button>
+    </h1>
+    <p id="Salida"></p>
+    <p id="Choques"></p>
+
+  </form>
+</body>
+
+</html>
